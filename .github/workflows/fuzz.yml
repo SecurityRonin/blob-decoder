@@ -1,0 +1,35 @@
+name: Fuzz
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * 1" # weekly deeper run
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      # cargo-fuzz needs nightly (`-Z` flags). rust-toolchain.toml pins a stable
+      # version that would win over the @nightly channel, so force `cargo +nightly`
+      # on every fuzz command (see CLAUDE.md "Rust MSRV & Toolchain Policy").
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          # ASan needs a dynamically-linked target; the musl-built cargo-fuzz
+          # otherwise defaults to musl (crt-static) and fails with E0463.
+          targets: x86_64-unknown-linux-gnu
+      - uses: taiki-e/install-action@a402910a723481c4c80d006d75298c796a9c8695 # cargo-fuzz
+        with:
+          tool: cargo-fuzz
+      - name: Build fuzz target
+        run: cargo +nightly fuzz build --target x86_64-unknown-linux-gnu
+      - name: Smoke-run (no-panic / bounded-memory invariant)
+        run: |
+          cargo +nightly fuzz run identify --target x86_64-unknown-linux-gnu \
+            -- -max_total_time=60 -runs=500000 -rss_limit_mb=2048

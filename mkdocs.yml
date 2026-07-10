@@ -1,0 +1,18 @@
+site_name: blob-decoder
+site_description: Identify and decode opaque forensic blobs of unknown type — scored, cited, recursively unwrapped.
+site_url: https://securityronin.github.io/blob-decoder/
+repo_url: https://github.com/SecurityRonin/blob-decoder
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: indigo
+nav:
+  - Home: index.md
+  - Validation: validation.md
+  - Privacy: privacy.md
+  - Terms: terms.md
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - tables
