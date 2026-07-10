@@ -2,7 +2,7 @@
 name = "blob-decoder"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.82.0"
+rust-version = "1.88.0"
 license = "Apache-2.0"
 description = "Identify and decode opaque forensic blobs of unknown type — scored, cited candidates, recursively unwrapping nested wrappers (base64 → gzip → binary-plist)."
 authors = ["Albert Hui <albert@securityronin.com>"]

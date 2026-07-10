@@ -1,4 +1,5 @@
 # clippy configuration for blob-decoder.
-# The CI-verified MSRV floor for the LIBRARY (see the `msrv` job in ci.yml and
-# the `rust-version` in Cargo.toml). Kept as low as the dependency graph allows.
-msrv = "1.82.0"
+# The CI-verified MSRV floor (see the `msrv` job in ci.yml and `rust-version` in
+# Cargo.toml). This is as low as the dependency graph allows: `plist 1.10 → time
+# 0.3.53` require rustc 1.88.0 (edition2024 in time-core), so 1.88.0 is the floor.
+msrv = "1.88.0"
