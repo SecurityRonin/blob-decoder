@@ -1,0 +1,25 @@
+[package]
+name = "blob-decoder-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.blob-decoder]
+path = ".."
+default-features = false
+
+# The one entry point (`identify`) fans out to every decoder, so a single target
+# covers the whole attack surface. Invariant: NO PANIC and BOUNDED MEMORY on any
+# input (blob-decoder parses attacker-controlled bytes — see SECURITY.md).
+[[bin]]
+name = "identify"
+path = "fuzz_targets/identify.rs"
+test = false
+doc = false
+bench = false
