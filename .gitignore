@@ -13,6 +13,9 @@
 cov.json
 lcov.info
 
+# mkdocs build output (docs.yml builds + deploys in CI; local `mkdocs build` output)
+/site
+
 # Claude Code session state — ephemeral, never tracked
 /.claude/
 
