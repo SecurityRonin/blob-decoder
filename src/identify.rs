@@ -97,6 +97,7 @@ fn build_chain(data: &[u8], capped: bool, limits: Limits, depth: usize) -> Decod
         identify_with_limits(data, limits, depth + 1)
             .into_iter()
             .next()
+            // cov:unreachable: identify_with_limits never returns empty (pushes Unknown), kept defensive fallback.
             .map_or_else(|| Box::new(unknown(data)), Box::new)
     };
     DecodedChain {

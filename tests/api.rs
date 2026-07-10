@@ -66,3 +66,30 @@ fn output_serializes_to_json() {
     let json = serde_json::to_string(&cands).expect("candidates serialize");
     assert!(json.contains("json"));
 }
+
+#[test]
+fn blobkind_wrapper_classification() {
+    assert!(BlobKind::Gzip.is_wrapper());
+    assert!(BlobKind::Base64.is_wrapper());
+    assert!(BlobKind::Hex.is_wrapper());
+    assert!(!BlobKind::Json.is_wrapper());
+    assert!(!BlobKind::Unknown.is_wrapper());
+    // label + citation are populated for every kind.
+    assert!(!BlobKind::BinaryPlist.label().is_empty());
+    assert!(BlobKind::Uuid.citation().contains("9562"));
+}
+
+#[test]
+fn hex_and_base64_readings_coexist_and_sort_deterministically() {
+    // "deadbeefdeadbeef" is BOTH valid hex (16 nibbles) and valid base64 (len%4=0),
+    // each decoding to opaque bytes → two Low, equal-rank readings. Exercises the
+    // final label tiebreak in the sort.
+    let cands = identify(b"deadbeefdeadbeef");
+    assert!(cands.iter().any(|c| c.kind == BlobKind::Hex));
+    assert!(cands.iter().any(|c| c.kind == BlobKind::Base64));
+    // Deterministic order across runs.
+    let again = identify(b"deadbeefdeadbeef");
+    let k1: Vec<_> = cands.iter().map(|c| c.kind).collect();
+    let k2: Vec<_> = again.iter().map(|c| c.kind).collect();
+    assert_eq!(k1, k2);
+}
