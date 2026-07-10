@@ -1,0 +1,71 @@
+[package]
+name = "blob-decoder"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82.0"
+license = "Apache-2.0"
+description = "Identify and decode opaque forensic blobs of unknown type — scored, cited candidates, recursively unwrapping nested wrappers (base64 → gzip → binary-plist)."
+authors = ["Albert Hui <albert@securityronin.com>"]
+repository = "https://github.com/SecurityRonin/blob-decoder"
+keywords = ["forensics", "dfir", "decode", "plist", "base64"]
+categories = ["parser-implementations", "command-line-utilities"]
+exclude = ["docs/", "fuzz/", ".github/"]
+
+# One crate: a library (the identification/decode engine — importable, fully
+# testable) plus a thin CLI shell over it (Humble Object). No `-core` split:
+# there is no lean-vs-heavy library consumer to serve.
+[lib]
+name = "blob_decoder"
+path = "src/lib.rs"
+
+[[bin]]
+name = "blob-decode"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[dependencies]
+# REUSE, never reinvent the decoders. This crate's value is ONLY the
+# orchestration layer (identify → dispatch → score → recursively unwrap); the
+# actual decoding is delegated to these mature crates:
+plist = "1"                # binary + XML property lists (Apple)
+base64 = "0.22"            # base64 (standard + url-safe)
+hex = "0.4"                # hex
+uuid = "1"                 # UUID/GUID parse + format
+flate2 = "1"               # gzip / zlib / raw deflate
+snap = "1"                 # Snappy (framed + raw)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"           # JSON detection + serialising Candidate output
+thiserror = "2"
+clap = { version = "4", features = ["derive"], optional = true }
+
+[features]
+# The CLI ships by default (blob-decoder is an analyst tool). A library consumer
+# wanting a lean build sets `default-features = false`.
+default = ["cli"]
+# CLI-only deps (clap). The [[bin]] target requires this feature; the library is
+# fully usable without it.
+cli = ["dep:clap"]
+
+# Paranoid Gatekeeper: this crate parses attacker-controllable bytes at its one
+# entry point (`identify`) — never panic, never trust a length/size field, never
+# OOM on a decompression bomb.
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+correctness = "deny"
+suspicious = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+doc_markdown = { level = "allow", priority = 1 }
+doc_lazy_continuation = { level = "allow", priority = 1 }
+module_name_repetitions = { level = "allow", priority = 1 }
+must_use_candidate = { level = "allow", priority = 1 }
+missing_errors_doc = { level = "allow", priority = 1 }
+missing_panics_doc = { level = "allow", priority = 1 }
+cast_possible_truncation = { level = "allow", priority = 1 }
+cast_possible_wrap = { level = "allow", priority = 1 }
+cast_sign_loss = { level = "allow", priority = 1 }
+cast_precision_loss = { level = "allow", priority = 1 }

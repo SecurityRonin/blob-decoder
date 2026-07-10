@@ -1,0 +1,24 @@
+/target
+
+# cargo-fuzz build/run artifacts (the targets themselves are committed)
+/fuzz/target
+/fuzz/corpus
+/fuzz/artifacts
+/fuzz/Cargo.lock
+
+# blob-decoder is a binary/app: Cargo.lock IS committed (reproducible shipped
+# graph + CI `cargo update --locked` freshness gate). Deliberately NOT ignored.
+
+# Coverage artifacts
+cov.json
+lcov.info
+
+# Claude Code session state — ephemeral, never tracked
+/.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

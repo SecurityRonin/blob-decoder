@@ -1,0 +1,4 @@
+# clippy configuration for blob-decoder.
+# The CI-verified MSRV floor for the LIBRARY (see the `msrv` job in ci.yml and
+# the `rust-version` in Cargo.toml). Kept as low as the dependency graph allows.
+msrv = "1.82.0"
