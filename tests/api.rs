@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 //! Core API contract: confidence ordering, best-first sorting, the always-present
 //! Unknown fallback, honest scoring on junk, and lossless serialization.
 

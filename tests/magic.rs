@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 //! Magic-signature identification against REAL inputs produced by independent
 //! tools (python3 plistlib/zlib, system gzip, the snap crate). Each is env-gated:
 //! a missing producer SKIPs, never fails.

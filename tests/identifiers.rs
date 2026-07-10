@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 //! UUID (string + raw bytes) and hex identification, incl. the honest scoring
 //! gap: a canonical UUID *string* is High; 16 arbitrary *bytes* are only Low.
 

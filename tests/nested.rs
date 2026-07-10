@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 //! Recursive unwrapping: a base64 → gzip → JSON blob must report the whole chain.
 
 mod common;

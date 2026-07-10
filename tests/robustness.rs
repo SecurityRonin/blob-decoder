@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 //! Adversarial inputs: truncated streams, a decompression bomb, invalid base64,
 //! and random bytes must degrade gracefully (never panic, never OOM).
 
