@@ -8,6 +8,7 @@
 
 use std::io::Write;
 use std::process::{Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Run `program args…`, feed `input` on stdin, return stdout bytes. `None` if the
 /// program is missing or exits non-zero (caller SKIPs the test).
@@ -85,4 +86,33 @@ pub fn gzip(data: &[u8]) -> Option<Vec<u8>> {
 /// base64-encode `data` via the system `base64` (independent of the base64 crate).
 pub fn base64(data: &[u8]) -> Option<Vec<u8>> {
     run_piped("base64", &[], data)
+}
+
+/// Encode a protobuf message to wire bytes with the system `protoc` — an
+/// independent oracle for the protobuf decode path (never `protobuf-forensic-core`
+/// itself). `schema` is a `.proto` source, `root_msg` its top-level message name,
+/// and `text` a text-format instance fed on stdin. `None` if `protoc` is absent.
+pub fn protoc_encode(schema: &str, root_msg: &str, text: &str) -> Option<Vec<u8>> {
+    static COUNTER: AtomicU64 = AtomicU64::new(0);
+    let uniq = COUNTER.fetch_add(1, Ordering::Relaxed);
+    let dir = std::env::temp_dir().join(format!("blobdec-protoc-{}-{uniq}", std::process::id()));
+    std::fs::create_dir_all(&dir).ok()?;
+    let proto = dir.join("schema.proto");
+    std::fs::write(&proto, schema).ok()?;
+    let result = (|| {
+        let mut child = Command::new("protoc")
+            .arg(format!("--encode={root_msg}"))
+            .arg(format!("--proto_path={}", dir.display()))
+            .arg(&proto)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .ok()?;
+        child.stdin.take()?.write_all(text.as_bytes()).ok()?;
+        let out = child.wait_with_output().ok()?;
+        out.status.success().then_some(out.stdout)
+    })();
+    let _ = std::fs::remove_dir_all(&dir);
+    result
 }
