@@ -47,11 +47,13 @@ confidence, ranked last. Nothing is hidden; everything is scored.
 | JSON | object/array root, full `serde_json` parse | High |
 | UUID / GUID | canonical hyphenated string | High |
 | base64, hex | charset + structure, decoded and unwrapped | Medium if the payload is a concrete type, else Low |
+| Protobuf (schemaless) | full schemaless wire-format decode via `protobuf-forensic-core` | Medium if the message carries a submessage/string, else Low (protobuf is a permissive, magic-less format) |
 | UUID (raw 16 bytes), UTF-16LE, UTF-8 text | structural heuristic (a random blob could satisfy it) | Low |
 
 Decoding is delegated to the mature crates that own each format — `plist`,
-`base64`, `hex`, `uuid`, `flate2`, `snap`, `serde_json`. `blob-decoder` adds only
-the orchestration: **identify → dispatch → score → recursively unwrap**.
+`base64`, `hex`, `uuid`, `flate2`, `snap`, `serde_json`, `protobuf-forensic-core`.
+`blob-decoder` adds only the orchestration: **identify → dispatch → score →
+recursively unwrap**.
 
 ## Install
 

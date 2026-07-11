@@ -61,6 +61,8 @@ pub enum BlobKind {
     Uuid,
     /// JSON (object or array root).
     Json,
+    /// Protocol Buffers wire-format message (schemaless / no `.proto`).
+    Protobuf,
     /// UTF-16LE text.
     Utf16Le,
     /// UTF-8 text (printable).
@@ -83,6 +85,7 @@ impl BlobKind {
             Self::Hex => "hexadecimal text",
             Self::Uuid => "UUID / GUID",
             Self::Json => "JSON",
+            Self::Protobuf => "Protocol Buffers (schemaless)",
             Self::Utf16Le => "UTF-16LE text",
             Self::Utf8Text => "UTF-8 text",
             Self::Unknown => "unknown",
@@ -103,6 +106,7 @@ impl BlobKind {
             Self::Hex => "RFC 4648 §8 (Base 16)",
             Self::Uuid => "RFC 9562 (UUID)",
             Self::Json => "RFC 8259 (JSON)",
+            Self::Protobuf => "protobuf.dev encoding spec (wire format)",
             Self::Utf16Le => "The Unicode Standard; RFC 2781 (UTF-16LE)",
             Self::Utf8Text => "RFC 3629 (UTF-8)",
             Self::Unknown => "no matching format",

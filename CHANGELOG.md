@@ -4,7 +4,17 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.1]
+
+### Added
+
+- Schemaless **Protobuf** detection: `BlobKind::Protobuf` decodes protobuf
+  wire-format bytes (no `.proto`) via `protobuf-forensic-core` and reports the
+  field structure. Scored conservatively — protobuf is a permissive, magic-less
+  format, so a bare parse is Low; a message with a nested submessage or string
+  lifts to Medium, and never above a magic-matched kind.
+
+## [0.1.0]
 
 ### Added
 

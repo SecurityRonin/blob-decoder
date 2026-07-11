@@ -1,6 +1,6 @@
 [package]
 name = "blob-decoder"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.88.0"
 license = "Apache-2.0"
@@ -33,6 +33,7 @@ hex = "0.4"                # hex
 uuid = "1"                 # UUID/GUID parse + format
 flate2 = "1"               # gzip / zlib / raw deflate
 snap = "1"                 # Snappy (framed + raw)
+protobuf-forensic-core = "0.1" # schemaless protobuf wire decoder (zero-dep, MSRV 1.80)
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"           # JSON detection + serialising Candidate output
 thiserror = "2"

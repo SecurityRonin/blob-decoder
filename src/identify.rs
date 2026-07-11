@@ -10,6 +10,7 @@
 use std::io::{Cursor, Read};
 
 use base64::Engine as _;
+use protobuf_forensic_core::{FieldValue, LenInterp};
 
 use crate::{BlobKind, Candidate, Confidence, DecodedChain, Limits};
 
@@ -45,6 +46,12 @@ pub fn identify_with_limits(bytes: &[u8], limits: Limits, depth: usize) -> Vec<C
         push(&mut out, detect_uuid_bytes(bytes));
         push(&mut out, detect_utf16le(bytes));
         push(&mut out, detect_utf8_text(bytes));
+        // Protobuf is a *permissive* wire format — many random/other-format byte
+        // strings parse cleanly — so it runs last and is downgraded to Low when
+        // any High-confidence kind already matched (it is never the true reading
+        // of a gzip/plist/json blob).
+        let strong = out.iter().any(|c| c.score == Confidence::High);
+        push(&mut out, detect_protobuf(bytes, strong));
     }
 
     if out.is_empty() {
@@ -78,7 +85,10 @@ fn kind_rank(kind: BlobKind) -> u8 {
         | BlobKind::Json
         | BlobKind::Uuid => 3,
         BlobKind::Base64 | BlobKind::Hex => 2,
-        BlobKind::Utf16Le | BlobKind::Utf8Text => 1,
+        // Protobuf sits at the bottom heuristic tier with bare text: a successful
+        // parse is a weak signal, so it never wins a confidence tie against a
+        // magic-identified (rank-3) or decoded-wrapper (rank-2) kind.
+        BlobKind::Protobuf | BlobKind::Utf16Le | BlobKind::Utf8Text => 1,
         BlobKind::Unknown => 0,
     }
 }
@@ -387,6 +397,68 @@ fn detect_utf8_text(bytes: &[u8]) -> Option<Candidate> {
         Confidence::Low,
         format!("UTF-8 text preview: \"{}\"", preview(s)),
     ))
+}
+
+/// Attempt a schemaless protobuf decode (delegated to `protobuf-forensic-core`).
+/// A candidate is offered ONLY when the whole input decodes as a valid message
+/// with ≥1 field — no trailing garbage, no empty message.
+///
+/// Scoring is deliberately conservative: protobuf is a *permissive* wire format
+/// (a large fraction of arbitrary byte strings parse as "valid protobuf"), so a
+/// bare successful parse is a WEAK signal and scores [`Confidence::Low`]. It is
+/// lifted to [`Confidence::Medium`] only on a corroborating signal — the message
+/// carries a nested submessage or a string field (structure a coincidental parse
+/// rarely produces) AND no High-confidence kind already matched (`strong_present`),
+/// so a gzip/plist/json blob that also happens to parse never gets a Medium.
+fn detect_protobuf(bytes: &[u8], strong_present: bool) -> Option<Candidate> {
+    let fields = protobuf_forensic_core::decode(bytes).ok()?;
+    if fields.is_empty() {
+        return None;
+    }
+    let (submessages, strings) = count_structure(&fields);
+    let structured = submessages > 0 || strings > 0;
+    let score = if structured && !strong_present {
+        Confidence::Medium
+    } else {
+        Confidence::Low
+    };
+    Some(leaf(
+        BlobKind::Protobuf,
+        score,
+        format!(
+            "protobuf wire-format message: {} field{} ({submessages} submessage{}, {strings} string{})",
+            fields.len(),
+            plural(fields.len()),
+            plural(submessages),
+            plural(strings),
+        ),
+    ))
+}
+
+/// Count the top-level length-delimited fields inferred as nested submessages and
+/// as strings — the corroborating structure that distinguishes a plausibly-real
+/// message from a coincidental parse of opaque scalars.
+fn count_structure(fields: &[protobuf_forensic_core::Field]) -> (usize, usize) {
+    let mut submessages = 0;
+    let mut strings = 0;
+    for f in fields {
+        if let FieldValue::Len(lv) = &f.value {
+            match lv.interp {
+                LenInterp::Message(_) => submessages += 1,
+                LenInterp::Text(_) => strings += 1,
+                LenInterp::Bytes => {}
+            }
+        }
+    }
+    (submessages, strings)
+}
+
+fn plural(n: usize) -> &'static str {
+    if n == 1 {
+        ""
+    } else {
+        "s"
+    }
 }
 
 // ---------------------------------------------------------------------------
