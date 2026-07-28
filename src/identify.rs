@@ -12,7 +12,7 @@ use std::io::{Cursor, Read};
 use base64::Engine as _;
 use protobuf_forensic_core::{FieldValue, LenInterp};
 
-use crate::{BlobKind, Candidate, Confidence, DecodedChain, Limits};
+use crate::{v8_value, BlobKind, Candidate, Confidence, DecodedChain, Limits};
 
 /// Identify a blob with default [`Limits`]. Returns scored candidates, best
 /// (highest [`Confidence`]) first. Always returns at least one candidate (an
@@ -37,6 +37,7 @@ pub fn identify_with_limits(bytes: &[u8], limits: Limits, depth: usize) -> Vec<C
     push(&mut out, detect_snappy(bytes, limits, depth));
     push(&mut out, detect_json(bytes));
     push(&mut out, detect_uuid_string(bytes));
+    push(&mut out, detect_v8_blink(bytes));
 
     // Heuristic detectors are bounded by max_input (they scan / decode the whole
     // blob), so huge inputs get magic-only identification.
@@ -83,7 +84,9 @@ fn kind_rank(kind: BlobKind) -> u8 {
         | BlobKind::Zlib
         | BlobKind::Snappy
         | BlobKind::Json
-        | BlobKind::Uuid => 3,
+        | BlobKind::Uuid
+        | BlobKind::V8Serialized
+        | BlobKind::BlinkSerialized => 3,
         BlobKind::Base64 | BlobKind::Hex => 2,
         // Protobuf sits at the bottom heuristic tier with bare text: a successful
         // parse is a weak signal, so it never wins a confidence tie against a
@@ -307,6 +310,56 @@ fn detect_uuid_string(bytes: &[u8]) -> Option<Candidate> {
             u.get_variant()
         ),
     ))
+}
+
+/// Detect a V8 structured-clone value or a Blink `SerializedScriptValue`. Both
+/// open with the `0xFF` version tag; a Blink envelope is distinguished by a
+/// framing byte (`0xFE` trailer or a nested `0xFF` V8 header) in the third
+/// position, where a raw V8 stream carries a value tag instead.
+///
+/// A full decode is High confidence. A decode that fails *after* opening a valid
+/// V8 value (e.g. a `kHostObject` typed array node serializes, or a truncated
+/// stream) is Medium and fails loud — surfacing the tag — rather than fabricating
+/// a reading. A `0xFF`-led blob whose first value tag is not a V8 tag is not
+/// claimed at all (returns `None`).
+fn detect_v8_blink(bytes: &[u8]) -> Option<Candidate> {
+    if bytes.first() != Some(&0xFF) || bytes.len() < 3 {
+        return None;
+    }
+    let is_blink = matches!(bytes.get(2), Some(0xFE | 0xFF));
+    let (kind, result) = if is_blink {
+        (
+            BlobKind::BlinkSerialized,
+            v8_value::deserialize_blink(bytes),
+        )
+    } else {
+        (BlobKind::V8Serialized, v8_value::deserialize(bytes))
+    };
+    match result {
+        Ok(v) => Some(leaf(
+            kind,
+            Confidence::High,
+            format!("{}: {}", kind.label(), v.summary()),
+        )),
+        Err(e) => {
+            // Only report a failed decode when the payload actually opened as V8
+            // (a known value tag right after the version header) — otherwise a
+            // random 0xFF-led binary would be mislabelled.
+            let opens_as_v8 = bytes
+                .get(1)
+                .zip(bytes.get(2))
+                .is_some_and(|(_ver, &t)| v8_value::is_value_tag(t) || t == 0xFE || t == 0xFF);
+            if opens_as_v8 {
+                Some(leaf(
+                    kind,
+                    Confidence::Medium,
+                    format!("{} header but decode failed: {e}", kind.label()),
+                ))
+            } else {
+                None
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

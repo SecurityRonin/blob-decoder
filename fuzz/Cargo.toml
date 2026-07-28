@@ -23,3 +23,13 @@ path = "fuzz_targets/identify.rs"
 test = false
 doc = false
 bench = false
+
+# The V8/Blink structured-clone deserializer parses attacker-controlled IndexedDB
+# bytes directly. Invariant: NO PANIC and BOUNDED MEMORY (depth + node caps) on
+# any input.
+[[bin]]
+name = "fuzz_v8"
+path = "fuzz_targets/fuzz_v8.rs"
+test = false
+doc = false
+bench = false

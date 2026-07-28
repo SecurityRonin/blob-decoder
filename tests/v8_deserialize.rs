@@ -1,4 +1,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
+// The `double_pi` fixture's JS input value is literally `3.14` — asserting the
+// exact decoded double is the point, so the near-PI lint does not apply here.
+#![allow(clippy::approx_constant)]
 //! Tier-2 oracle: real V8 `ValueSerializer` output (minted by node's
 //! `v8.serialize`; see tests/data/README.md + scripts/mint_v8_fixtures.mjs). The
 //! **known JS input value is the ground truth** — the deserializer must reproduce

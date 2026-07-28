@@ -30,6 +30,7 @@
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
 pub mod identify;
+pub mod v8_value;
 
 pub use identify::{identify, identify_with_limits};
 
@@ -63,6 +64,11 @@ pub enum BlobKind {
     Json,
     /// Protocol Buffers wire-format message (schemaless / no `.proto`).
     Protobuf,
+    /// A raw V8 structured-clone value (`ValueSerializer` output).
+    V8Serialized,
+    /// A Chromium/Blink `SerializedScriptValue` (the on-disk IndexedDB form —
+    /// a Blink envelope wrapping a V8 structured-clone payload).
+    BlinkSerialized,
     /// UTF-16LE text.
     Utf16Le,
     /// UTF-8 text (printable).
@@ -86,6 +92,8 @@ impl BlobKind {
             Self::Uuid => "UUID / GUID",
             Self::Json => "JSON",
             Self::Protobuf => "Protocol Buffers (schemaless)",
+            Self::V8Serialized => "V8 structured-clone value",
+            Self::BlinkSerialized => "Chromium/Blink SerializedScriptValue",
             Self::Utf16Le => "UTF-16LE text",
             Self::Utf8Text => "UTF-8 text",
             Self::Unknown => "unknown",
@@ -107,6 +115,8 @@ impl BlobKind {
             Self::Uuid => "RFC 9562 (UUID)",
             Self::Json => "RFC 8259 (JSON)",
             Self::Protobuf => "protobuf.dev encoding spec (wire format)",
+            Self::V8Serialized => "V8 src/objects/value-serializer.cc (SerializationTag)",
+            Self::BlinkSerialized => "Blink serialization_tag.h; V8 value-serializer.cc",
             Self::Utf16Le => "The Unicode Standard; RFC 2781 (UTF-16LE)",
             Self::Utf8Text => "RFC 3629 (UTF-8)",
             Self::Unknown => "no matching format",
