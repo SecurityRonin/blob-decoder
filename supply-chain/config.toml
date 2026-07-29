@@ -47,18 +47,6 @@ criteria = "safe-to-deploy"
 version = "1.0.4"
 criteria = "safe-to-deploy"
 
-[[exemptions.clap]]
-version = "4.6.1"
-criteria = "safe-to-deploy"
-
-[[exemptions.clap_builder]]
-version = "4.6.0"
-criteria = "safe-to-deploy"
-
-[[exemptions.clap_derive]]
-version = "4.6.1"
-criteria = "safe-to-deploy"
-
 [[exemptions.clap_lex]]
 version = "1.1.0"
 criteria = "safe-to-deploy"
@@ -73,18 +61,6 @@ criteria = "safe-to-deploy"
 
 [[exemptions.flate2]]
 version = "1.1.9"
-criteria = "safe-to-deploy"
-
-[[exemptions.futures-core]]
-version = "0.3.32"
-criteria = "safe-to-deploy"
-
-[[exemptions.futures-task]]
-version = "0.3.32"
-criteria = "safe-to-deploy"
-
-[[exemptions.futures-util]]
-version = "0.3.32"
 criteria = "safe-to-deploy"
 
 [[exemptions.hashbrown]]
@@ -131,80 +107,24 @@ criteria = "safe-to-deploy"
 version = "1.10.0"
 criteria = "safe-to-deploy"
 
-[[exemptions.protobuf-forensic-core]]
-version = "0.1.0"
-criteria = "safe-to-deploy"
-
 [[exemptions.quick-xml]]
 version = "0.41.0"
-criteria = "safe-to-deploy"
-
-[[exemptions.quote]]
-version = "1.0.46"
 criteria = "safe-to-deploy"
 
 [[exemptions.rustversion]]
 version = "1.0.23"
 criteria = "safe-to-deploy"
 
-[[exemptions.serde]]
-version = "1.0.228"
-criteria = "safe-to-deploy"
-
-[[exemptions.serde_core]]
-version = "1.0.228"
-criteria = "safe-to-deploy"
-
-[[exemptions.serde_derive]]
-version = "1.0.228"
-criteria = "safe-to-deploy"
-
-[[exemptions.serde_json]]
-version = "1.0.150"
-criteria = "safe-to-deploy"
-
-[[exemptions.simd-adler32]]
-version = "0.3.9"
-criteria = "safe-to-deploy"
-
 [[exemptions.slab]]
 version = "0.4.12"
-criteria = "safe-to-deploy"
-
-[[exemptions.snap]]
-version = "1.1.1"
-criteria = "safe-to-deploy"
-
-[[exemptions.syn]]
-version = "2.0.118"
-criteria = "safe-to-deploy"
-
-[[exemptions.thiserror]]
-version = "2.0.18"
-criteria = "safe-to-deploy"
-
-[[exemptions.thiserror-impl]]
-version = "2.0.18"
-criteria = "safe-to-deploy"
-
-[[exemptions.time]]
-version = "0.3.53"
 criteria = "safe-to-deploy"
 
 [[exemptions.time-core]]
 version = "0.1.9"
 criteria = "safe-to-deploy"
 
-[[exemptions.time-macros]]
-version = "0.2.31"
-criteria = "safe-to-deploy"
-
 [[exemptions.unicode-ident]]
 version = "1.0.24"
-criteria = "safe-to-deploy"
-
-[[exemptions.uuid]]
-version = "1.23.4"
 criteria = "safe-to-deploy"
 
 [[exemptions.wasm-bindgen]]
@@ -229,8 +149,4 @@ criteria = "safe-to-deploy"
 
 [[exemptions.windows-sys]]
 version = "0.61.2"
-criteria = "safe-to-deploy"
-
-[[exemptions.zmij]]
-version = "1.0.21"
 criteria = "safe-to-deploy"
