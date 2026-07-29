@@ -39,12 +39,20 @@ criteria = "safe-to-deploy"
 version = "3.0.11"
 criteria = "safe-to-deploy"
 
-[[exemptions.blob-decoder]]
-version = "0.1.1"
-criteria = "safe-to-deploy"
-
 [[exemptions.cfg-if]]
 version = "1.0.4"
+criteria = "safe-to-deploy"
+
+[[exemptions.clap]]
+version = "4.6.4"
+criteria = "safe-to-deploy"
+
+[[exemptions.clap_builder]]
+version = "4.6.2"
+criteria = "safe-to-deploy"
+
+[[exemptions.clap_derive]]
+version = "4.6.4"
 criteria = "safe-to-deploy"
 
 [[exemptions.clap_lex]]
@@ -61,6 +69,18 @@ criteria = "safe-to-deploy"
 
 [[exemptions.flate2]]
 version = "1.1.9"
+criteria = "safe-to-deploy"
+
+[[exemptions.futures-core]]
+version = "0.3.33"
+criteria = "safe-to-deploy"
+
+[[exemptions.futures-task]]
+version = "0.3.33"
+criteria = "safe-to-deploy"
+
+[[exemptions.futures-util]]
+version = "0.3.33"
 criteria = "safe-to-deploy"
 
 [[exemptions.hashbrown]]
@@ -107,6 +127,14 @@ criteria = "safe-to-deploy"
 version = "1.10.0"
 criteria = "safe-to-deploy"
 
+[[exemptions.proc-macro2]]
+version = "1.0.107"
+criteria = "safe-to-deploy"
+
+[[exemptions.protobuf-forensic-core]]
+version = "0.1.1"
+criteria = "safe-to-deploy"
+
 [[exemptions.quick-xml]]
 version = "0.41.0"
 criteria = "safe-to-deploy"
@@ -115,16 +143,68 @@ criteria = "safe-to-deploy"
 version = "1.0.23"
 criteria = "safe-to-deploy"
 
+[[exemptions.serde]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_core]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_derive]]
+version = "1.0.229"
+criteria = "safe-to-deploy"
+
+[[exemptions.serde_json]]
+version = "1.0.151"
+criteria = "safe-to-deploy"
+
+[[exemptions.simd-adler32]]
+version = "0.3.10"
+criteria = "safe-to-deploy"
+
 [[exemptions.slab]]
 version = "0.4.12"
+criteria = "safe-to-deploy"
+
+[[exemptions.snap]]
+version = "1.1.2"
+criteria = "safe-to-deploy"
+
+[[exemptions.syn]]
+version = "2.0.119"
+criteria = "safe-to-deploy"
+
+[[exemptions.syn]]
+version = "3.0.3"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror]]
+version = "2.0.19"
+criteria = "safe-to-deploy"
+
+[[exemptions.thiserror-impl]]
+version = "2.0.19"
+criteria = "safe-to-deploy"
+
+[[exemptions.time]]
+version = "0.3.54"
 criteria = "safe-to-deploy"
 
 [[exemptions.time-core]]
 version = "0.1.9"
 criteria = "safe-to-deploy"
 
+[[exemptions.time-macros]]
+version = "0.2.32"
+criteria = "safe-to-deploy"
+
 [[exemptions.unicode-ident]]
 version = "1.0.24"
+criteria = "safe-to-deploy"
+
+[[exemptions.uuid]]
+version = "1.24.0"
 criteria = "safe-to-deploy"
 
 [[exemptions.wasm-bindgen]]
@@ -149,4 +229,8 @@ criteria = "safe-to-deploy"
 
 [[exemptions.windows-sys]]
 version = "0.61.2"
+criteria = "safe-to-deploy"
+
+[[exemptions.zmij]]
+version = "1.0.23"
 criteria = "safe-to-deploy"
