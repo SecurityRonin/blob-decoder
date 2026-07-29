@@ -749,6 +749,8 @@ impl<'a> Reader<'a> {
     fn read_reference(&mut self) -> Result<V8Value, V8Error> {
         let offset = self.pos;
         let id = self.read_varint()?;
+        // cov:unreachable: usize::try_from(u64) is infallible on 64-bit targets (the
+        // CI/coverage platform); the map_err arm guards a 32-bit `id` overflow only.
         let idx = usize::try_from(id).map_err(|_| V8Error::BadReference { offset, id })?;
         let value = self
             .id_map
@@ -772,6 +774,10 @@ impl<'a> Reader<'a> {
                 cap: self.limits.max_nodes,
             });
         }
+        // The guard above already rejected len > cap (max_nodes, 4_000_000), so len
+        // fits usize on every supported target; this map_err is a defense-in-depth
+        // backstop no input can reach.
+        // cov:unreachable: len <= cap after the guard makes usize::try_from infallible.
         usize::try_from(len).map_err(|_| V8Error::LengthCap {
             offset: self.pos,
             len,
