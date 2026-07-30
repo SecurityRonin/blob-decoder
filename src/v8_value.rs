@@ -778,10 +778,15 @@ impl<'a> Reader<'a> {
         // fits usize on every supported target; this map_err is a defense-in-depth
         // backstop no input can reach.
         // cov:unreachable: len <= cap after the guard makes usize::try_from infallible.
-        usize::try_from(len).map_err(|_| V8Error::LengthCap {
-            offset: self.pos,
-            len,
-            cap: self.limits.max_nodes,
+        usize::try_from(len).map_err(|_| {
+            // cov:unreachable: the `len > cap` guard above already returned, so
+            // len <= cap == max_nodes as u64. Since max_nodes is a usize, any value
+            // <= it fits usize on every target — this closure body is dead.
+            V8Error::LengthCap {
+                offset: self.pos,
+                len,
+                cap: self.limits.max_nodes,
+            }
         })
     }
 }
@@ -821,6 +826,17 @@ fn le_bytes_to_decimal(bytes: &[u8]) -> String {
     }
     // Strip leading zeros (most-significant end), then render most-significant first.
     while decimal.len() > 1 && *decimal.last().unwrap_or(&0) == 0 {
+        // cov:unreachable: the schoolbook loop above never leaves a zero in the
+        // most-significant slot. Induction: `decimal` starts `[0]` (len 1). A digit is
+        // appended only by `while carry > 0`, whose final push is `carry` itself with
+        // 0 < carry < 10, so a pushed top digit is non-zero. Otherwise the top digit
+        // becomes `v = d_top * 256 + carry_in` with v < 10, which is 0 only when
+        // d_top == 0 and carry_in == 0 — and d_top == 0 implies len == 1 by the same
+        // induction, which this loop's own `len > 1` guard excludes. Verified by
+        // exhaustive replay of all magnitudes up to 3 bytes (16,843,009 cases) plus
+        // 200k random magnitudes up to 12 bytes: the loop never fires. Kept as a
+        // defensive normalizer so a future change to the carry loop cannot emit a
+        // leading-zero decimal.
         decimal.pop();
     }
     decimal.iter().rev().map(|d| (b'0' + d) as char).collect()

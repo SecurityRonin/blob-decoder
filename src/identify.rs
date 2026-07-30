@@ -417,6 +417,10 @@ fn detect_utf16le(bytes: &[u8]) -> Option<Candidate> {
         .map(|c| u16::from_le_bytes([c[0], c[1]]))
         .collect();
     if units.is_empty() {
+        // cov:unreachable: the guard above establishes bytes.len() >= 4 and even, and
+        // `body` is either `bytes` or `bytes[2..]` (BOM), so body.len() >= 2 and
+        // chunks_exact(2) always yields at least one unit. Kept as a defensive
+        // backstop in case the length guard above is ever relaxed.
         return None;
     }
     let text = String::from_utf16(&units).ok()?;
@@ -616,6 +620,10 @@ fn describe_plist(v: &plist::Value) -> String {
         plist::Value::Integer(_) => "integer".to_owned(),
         plist::Value::String(_) => "string".to_owned(),
         plist::Value::Uid(_) => "uid".to_owned(),
+        // cov:unreachable: `plist::Value` (plist 1.9.0) has exactly the nine variants
+        // matched above — Array, Dictionary, Boolean, Data, Date, Real, Integer,
+        // String, Uid. The enum is `#[non_exhaustive]`, so this arm exists only so a
+        // future plist release that adds a variant still compiles here.
         _ => "value".to_owned(),
     }
 }
@@ -665,5 +673,79 @@ fn preview(s: &str) -> String {
     } else {
         let cut: String = flat.chars().take(MAX).collect();
         format!("{cut}… ({} chars total)", s.chars().count())
+    }
+}
+
+/// Unit tests for the module-private helpers whose defensive arms the public
+/// `identify` path cannot reach (they are dominated by an earlier guard), so the
+/// behaviour is pinned here rather than assumed.
+#[cfg(test)]
+mod tests {
+    use super::{describe_json, kind_rank, mostly_printable};
+    use crate::BlobKind;
+
+    /// `Unknown` must rank below every other kind so an unrecognized reading always
+    /// sorts last when it ties on confidence. The public path never places an
+    /// `Unknown` candidate alongside others (it is pushed only when nothing else
+    /// matched, giving a one-element list that `sort_by` never compares), so the
+    /// ordering contract is asserted directly here.
+    #[test]
+    fn unknown_ranks_below_every_other_kind() {
+        let unknown = kind_rank(BlobKind::Unknown);
+        assert_eq!(unknown, 0);
+        for kind in [
+            BlobKind::BinaryPlist,
+            BlobKind::XmlPlist,
+            BlobKind::Gzip,
+            BlobKind::Zlib,
+            BlobKind::Snappy,
+            BlobKind::Base64,
+            BlobKind::Hex,
+            BlobKind::Uuid,
+            BlobKind::Json,
+            BlobKind::Protobuf,
+            BlobKind::V8Serialized,
+            BlobKind::BlinkSerialized,
+            BlobKind::Utf16Le,
+            BlobKind::Utf8Text,
+        ] {
+            let rank = kind_rank(kind);
+            assert!(rank > unknown, "{kind:?} must outrank Unknown, got {rank}");
+        }
+    }
+
+    /// `describe_json` is only called on `{`/`[` roots, so its fallback arm is a
+    /// defensive backstop. It must still describe a scalar root honestly rather than
+    /// claiming a shape it does not have.
+    #[test]
+    fn describe_json_falls_back_for_a_scalar_root() {
+        assert_eq!(
+            describe_json(&serde_json::Value::Object(serde_json::Map::new())),
+            "JSON object with 0 keys"
+        );
+        assert_eq!(
+            describe_json(&serde_json::Value::Array(vec![serde_json::Value::Null])),
+            "JSON array with 1 elements"
+        );
+        for scalar in [
+            serde_json::Value::Null,
+            serde_json::Value::Bool(true),
+            serde_json::Value::from(1),
+            serde_json::Value::from("s"),
+        ] {
+            assert_eq!(describe_json(&scalar), "JSON value");
+        }
+    }
+
+    /// Empty text is not "mostly printable": a zero-length decode is no evidence of
+    /// text at all. Both callers short-circuit on empty before asking, so the
+    /// contract is pinned here.
+    #[test]
+    fn mostly_printable_rejects_empty_text() {
+        assert!(!mostly_printable(""));
+        assert!(mostly_printable("hello"));
+        assert!(mostly_printable("tab\tnewline\r\n"));
+        // 2 printable of 12 chars is far below the 90% floor.
+        assert!(!mostly_printable("ab\0\0\0\0\0\0\0\0\0\0"));
     }
 }
