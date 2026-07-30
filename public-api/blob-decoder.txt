@@ -1,0 +1,115 @@
+pub mod blob_decoder
+pub mod blob_decoder::identify
+pub fn blob_decoder::identify::identify(&[u8]) -> alloc::vec::Vec<blob_decoder::Candidate>
+pub fn blob_decoder::identify::identify_with_limits(&[u8], blob_decoder::Limits, usize) -> alloc::vec::Vec<blob_decoder::Candidate>
+pub mod blob_decoder::v8_value
+pub enum blob_decoder::v8_value::V8Error
+pub blob_decoder::v8_value::V8Error::BadKey
+pub blob_decoder::v8_value::V8Error::BadKey::offset: usize
+pub blob_decoder::v8_value::V8Error::BadReference
+pub blob_decoder::v8_value::V8Error::BadReference::id: u64
+pub blob_decoder::v8_value::V8Error::BadReference::offset: usize
+pub blob_decoder::v8_value::V8Error::BadVarint
+pub blob_decoder::v8_value::V8Error::BadVarint::offset: usize
+pub blob_decoder::v8_value::V8Error::BadVersion
+pub blob_decoder::v8_value::V8Error::BadVersion::found: u8
+pub blob_decoder::v8_value::V8Error::BadVersion::offset: usize
+pub blob_decoder::v8_value::V8Error::DepthCap
+pub blob_decoder::v8_value::V8Error::DepthCap::cap: usize
+pub blob_decoder::v8_value::V8Error::DepthCap::offset: usize
+pub blob_decoder::v8_value::V8Error::HostObject
+pub blob_decoder::v8_value::V8Error::HostObject::blink_tag: u8
+pub blob_decoder::v8_value::V8Error::HostObject::offset: usize
+pub blob_decoder::v8_value::V8Error::LengthCap
+pub blob_decoder::v8_value::V8Error::LengthCap::cap: usize
+pub blob_decoder::v8_value::V8Error::LengthCap::len: u64
+pub blob_decoder::v8_value::V8Error::LengthCap::offset: usize
+pub blob_decoder::v8_value::V8Error::NodeCap
+pub blob_decoder::v8_value::V8Error::NodeCap::cap: usize
+pub blob_decoder::v8_value::V8Error::OddUtf16
+pub blob_decoder::v8_value::V8Error::OddUtf16::len: usize
+pub blob_decoder::v8_value::V8Error::OddUtf16::offset: usize
+pub blob_decoder::v8_value::V8Error::Truncated
+pub blob_decoder::v8_value::V8Error::Truncated::available: usize
+pub blob_decoder::v8_value::V8Error::Truncated::needed: usize
+pub blob_decoder::v8_value::V8Error::Truncated::offset: usize
+pub blob_decoder::v8_value::V8Error::UnsupportedTag
+pub blob_decoder::v8_value::V8Error::UnsupportedTag::offset: usize
+pub blob_decoder::v8_value::V8Error::UnsupportedTag::tag: u8
+pub enum blob_decoder::v8_value::V8Value
+pub blob_decoder::v8_value::V8Value::Array(alloc::vec::Vec<blob_decoder::v8_value::V8Value>)
+pub blob_decoder::v8_value::V8Value::ArrayBuffer(alloc::vec::Vec<u8>)
+pub blob_decoder::v8_value::V8Value::BigInt(alloc::string::String)
+pub blob_decoder::v8_value::V8Value::BigIntObject(alloc::string::String)
+pub blob_decoder::v8_value::V8Value::Bool(bool)
+pub blob_decoder::v8_value::V8Value::BooleanObject(bool)
+pub blob_decoder::v8_value::V8Value::Date(f64)
+pub blob_decoder::v8_value::V8Value::Double(f64)
+pub blob_decoder::v8_value::V8Value::Hole
+pub blob_decoder::v8_value::V8Value::Int(i64)
+pub blob_decoder::v8_value::V8Value::Map(alloc::vec::Vec<(blob_decoder::v8_value::V8Value, blob_decoder::v8_value::V8Value)>)
+pub blob_decoder::v8_value::V8Value::Null
+pub blob_decoder::v8_value::V8Value::NumberObject(f64)
+pub blob_decoder::v8_value::V8Value::Object(alloc::vec::Vec<(alloc::string::String, blob_decoder::v8_value::V8Value)>)
+pub blob_decoder::v8_value::V8Value::RegExp
+pub blob_decoder::v8_value::V8Value::RegExp::flags: u32
+pub blob_decoder::v8_value::V8Value::RegExp::source: alloc::string::String
+pub blob_decoder::v8_value::V8Value::Set(alloc::vec::Vec<blob_decoder::v8_value::V8Value>)
+pub blob_decoder::v8_value::V8Value::String(alloc::string::String)
+pub blob_decoder::v8_value::V8Value::StringObject(alloc::string::String)
+pub blob_decoder::v8_value::V8Value::Undefined
+impl blob_decoder::v8_value::V8Value
+pub fn blob_decoder::v8_value::V8Value::summary(&self) -> alloc::string::String
+pub struct blob_decoder::v8_value::V8Limits
+pub blob_decoder::v8_value::V8Limits::max_depth: usize
+pub blob_decoder::v8_value::V8Limits::max_nodes: usize
+impl core::default::Default for blob_decoder::v8_value::V8Limits
+pub fn blob_decoder::v8_value::V8Limits::default() -> Self
+pub fn blob_decoder::v8_value::deserialize(&[u8]) -> core::result::Result<blob_decoder::v8_value::V8Value, blob_decoder::v8_value::V8Error>
+pub fn blob_decoder::v8_value::deserialize_blink(&[u8]) -> core::result::Result<blob_decoder::v8_value::V8Value, blob_decoder::v8_value::V8Error>
+pub fn blob_decoder::v8_value::deserialize_blink_with_limits(&[u8], blob_decoder::v8_value::V8Limits) -> core::result::Result<blob_decoder::v8_value::V8Value, blob_decoder::v8_value::V8Error>
+pub fn blob_decoder::v8_value::deserialize_with_limits(&[u8], blob_decoder::v8_value::V8Limits) -> core::result::Result<blob_decoder::v8_value::V8Value, blob_decoder::v8_value::V8Error>
+pub fn blob_decoder::v8_value::is_value_tag(u8) -> bool
+pub enum blob_decoder::BlobKind
+pub blob_decoder::BlobKind::Base64
+pub blob_decoder::BlobKind::BinaryPlist
+pub blob_decoder::BlobKind::BlinkSerialized
+pub blob_decoder::BlobKind::Gzip
+pub blob_decoder::BlobKind::Hex
+pub blob_decoder::BlobKind::Json
+pub blob_decoder::BlobKind::Protobuf
+pub blob_decoder::BlobKind::Snappy
+pub blob_decoder::BlobKind::Unknown
+pub blob_decoder::BlobKind::Utf16Le
+pub blob_decoder::BlobKind::Utf8Text
+pub blob_decoder::BlobKind::Uuid
+pub blob_decoder::BlobKind::V8Serialized
+pub blob_decoder::BlobKind::XmlPlist
+pub blob_decoder::BlobKind::Zlib
+impl blob_decoder::BlobKind
+pub fn blob_decoder::BlobKind::citation(self) -> &'static str
+pub fn blob_decoder::BlobKind::is_wrapper(self) -> bool
+pub fn blob_decoder::BlobKind::label(self) -> &'static str
+pub enum blob_decoder::Confidence
+pub blob_decoder::Confidence::High
+pub blob_decoder::Confidence::Low
+pub blob_decoder::Confidence::Medium
+pub struct blob_decoder::Candidate
+pub blob_decoder::Candidate::citation: &'static str
+pub blob_decoder::Candidate::inner: core::option::Option<alloc::boxed::Box<blob_decoder::DecodedChain>>
+pub blob_decoder::Candidate::kind: blob_decoder::BlobKind
+pub blob_decoder::Candidate::score: blob_decoder::Confidence
+pub blob_decoder::Candidate::summary: alloc::string::String
+pub struct blob_decoder::DecodedChain
+pub blob_decoder::DecodedChain::best: alloc::boxed::Box<blob_decoder::Candidate>
+pub blob_decoder::DecodedChain::capped: bool
+pub blob_decoder::DecodedChain::decoded_len: usize
+pub struct blob_decoder::Limits
+pub blob_decoder::Limits::max_depth: usize
+pub blob_decoder::Limits::max_input: usize
+pub blob_decoder::Limits::max_output: usize
+impl core::default::Default for blob_decoder::Limits
+pub fn blob_decoder::Limits::default() -> Self
+pub const blob_decoder::VERSION: &str
+pub fn blob_decoder::identify(&[u8]) -> alloc::vec::Vec<blob_decoder::Candidate>
+pub fn blob_decoder::identify_with_limits(&[u8], blob_decoder::Limits, usize) -> alloc::vec::Vec<blob_decoder::Candidate>
