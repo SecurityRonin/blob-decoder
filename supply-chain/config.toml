@@ -131,10 +131,6 @@ criteria = "safe-to-deploy"
 version = "1.0.107"
 criteria = "safe-to-deploy"
 
-[[exemptions.protobuf-forensic-core]]
-version = "0.1.1"
-criteria = "safe-to-deploy"
-
 [[exemptions.quick-xml]]
 version = "0.41.0"
 criteria = "safe-to-deploy"
