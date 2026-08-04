@@ -681,8 +681,8 @@ fn preview(s: &str) -> String {
 /// behaviour is pinned here rather than assumed.
 #[cfg(test)]
 mod tests {
-    use super::{describe_json, kind_rank, mostly_printable};
-    use crate::BlobKind;
+    use super::{describe_json, detect_protobuf, kind_rank, mostly_printable};
+    use crate::{BlobKind, Confidence};
 
     /// `Unknown` must rank below every other kind so an unrecognized reading always
     /// sorts last when it ties on confidence. The public path never places an
@@ -747,5 +747,41 @@ mod tests {
         assert!(mostly_printable("tab\tnewline\r\n"));
         // 2 printable of 12 chars is far below the 90% floor.
         assert!(!mostly_printable("ab\0\0\0\0\0\0\0\0\0\0"));
+    }
+
+    /// A protobuf message whose length-delimited fields carry *corroborating
+    /// structure* — one nested submessage and one string. Opaque scalars alone
+    /// could be a coincidental parse of any byte run, so only this structured
+    /// shape earns `Medium`, and only when no stronger reading is competing.
+    ///
+    /// Wire format, hand-assembled so the fixture is readable:
+    ///   `0A 05 "hello"`  field 1, LEN, five text bytes  -> a string
+    ///   `12 02 08 01`    field 2, LEN, holding `08 01`  -> a nested message
+    ///                    (`08 01` is field 1, varint, value 1)
+    const STRUCTURED: &[u8] = b"\x0a\x05hello\x12\x02\x08\x01";
+
+    #[test]
+    fn structured_protobuf_scores_medium_only_without_a_stronger_reading() {
+        let c = detect_protobuf(STRUCTURED, false).expect("two well-formed fields decode");
+        assert_eq!(c.kind, BlobKind::Protobuf);
+        assert_eq!(
+            c.score,
+            Confidence::Medium,
+            "submessage + string is corroborating structure: {}",
+            c.summary
+        );
+        assert!(
+            c.summary.contains("1 submessage") && c.summary.contains("1 string"),
+            "both field shapes should be counted and reported: {}",
+            c.summary
+        );
+    }
+
+    #[test]
+    fn the_same_bytes_score_low_when_a_stronger_reading_is_present() {
+        // Identical input, `strong_present = true`: the structure is unchanged,
+        // so anything but a downgrade would mean the flag is not consulted.
+        let c = detect_protobuf(STRUCTURED, true).expect("two well-formed fields decode");
+        assert_eq!(c.score, Confidence::Low);
     }
 }
