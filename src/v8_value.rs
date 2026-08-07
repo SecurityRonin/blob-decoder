@@ -774,19 +774,14 @@ impl<'a> Reader<'a> {
                 cap: self.limits.max_nodes,
             });
         }
-        // The guard above already rejected len > cap (max_nodes, 4_000_000), so len
-        // fits usize on every supported target; this map_err is a defense-in-depth
-        // backstop no input can reach.
-        // cov:unreachable: len <= cap after the guard makes usize::try_from infallible.
-        usize::try_from(len).map_err(|_| {
-            // cov:unreachable: the `len > cap` guard above already returned, so
-            // len <= cap == max_nodes as u64. Since max_nodes is a usize, any value
-            // <= it fits usize on every target — this closure body is dead.
-            V8Error::LengthCap {
-                offset: self.pos,
-                len,
-                cap: self.limits.max_nodes,
-            }
+        // The guard above already rejected len > cap (max_nodes, 4_000_000), so
+        // len <= cap == max_nodes as u64. max_nodes is a usize, so any value <= it
+        // fits usize on every supported target and this map_err closure is a
+        // defense-in-depth backstop no input can reach.
+        usize::try_from(len).map_err(|_| V8Error::LengthCap {
+            offset: self.pos,           // cov:unreachable: len <= cap makes try_from infallible
+            len,                        // cov:unreachable: len <= cap makes try_from infallible
+            cap: self.limits.max_nodes, // cov:unreachable: len <= cap makes try_from infallible
         })
     }
 }
@@ -825,19 +820,19 @@ fn le_bytes_to_decimal(bytes: &[u8]) -> String {
         }
     }
     // Strip leading zeros (most-significant end), then render most-significant first.
+    //
+    // The schoolbook loop above never leaves a zero in the most-significant slot.
+    // Induction: `decimal` starts `[0]` (len 1). A digit is appended only by
+    // `while carry > 0`, whose final push is `carry` itself with 0 < carry < 10, so
+    // a pushed top digit is non-zero. Otherwise the top digit becomes
+    // `v = d_top * 256 + carry_in` with v < 10, which is 0 only when d_top == 0 and
+    // carry_in == 0 — and d_top == 0 implies len == 1 by the same induction, which
+    // this loop's own `len > 1` guard excludes. Verified by exhaustive replay of all
+    // magnitudes up to 3 bytes (16,843,009 cases) plus 200k random magnitudes up to
+    // 12 bytes: the loop never fires. Kept as a defensive normalizer so a future
+    // change to the carry loop cannot emit a leading-zero decimal.
     while decimal.len() > 1 && *decimal.last().unwrap_or(&0) == 0 {
-        // cov:unreachable: the schoolbook loop above never leaves a zero in the
-        // most-significant slot. Induction: `decimal` starts `[0]` (len 1). A digit is
-        // appended only by `while carry > 0`, whose final push is `carry` itself with
-        // 0 < carry < 10, so a pushed top digit is non-zero. Otherwise the top digit
-        // becomes `v = d_top * 256 + carry_in` with v < 10, which is 0 only when
-        // d_top == 0 and carry_in == 0 — and d_top == 0 implies len == 1 by the same
-        // induction, which this loop's own `len > 1` guard excludes. Verified by
-        // exhaustive replay of all magnitudes up to 3 bytes (16,843,009 cases) plus
-        // 200k random magnitudes up to 12 bytes: the loop never fires. Kept as a
-        // defensive normalizer so a future change to the carry loop cannot emit a
-        // leading-zero decimal.
-        decimal.pop();
+        decimal.pop(); // cov:unreachable: the carry loop never leaves a zero on top
     }
     decimal.iter().rev().map(|d| (b'0' + d) as char).collect()
 }
