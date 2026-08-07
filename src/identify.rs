@@ -417,11 +417,11 @@ fn detect_utf16le(bytes: &[u8]) -> Option<Candidate> {
         .map(|c| u16::from_le_bytes([c[0], c[1]]))
         .collect();
     if units.is_empty() {
-        // cov:unreachable: the guard above establishes bytes.len() >= 4 and even, and
-        // `body` is either `bytes` or `bytes[2..]` (BOM), so body.len() >= 2 and
+        // The guard above establishes bytes.len() >= 4 and even, and `body` is
+        // either `bytes` or `bytes[2..]` (BOM), so body.len() >= 2 and
         // chunks_exact(2) always yields at least one unit. Kept as a defensive
         // backstop in case the length guard above is ever relaxed.
-        return None;
+        return None; // cov:unreachable: body.len() >= 2, so chunks_exact(2) yields >= 1 unit
     }
     let text = String::from_utf16(&units).ok()?;
     if !mostly_printable(&text) {
@@ -620,11 +620,11 @@ fn describe_plist(v: &plist::Value) -> String {
         plist::Value::Integer(_) => "integer".to_owned(),
         plist::Value::String(_) => "string".to_owned(),
         plist::Value::Uid(_) => "uid".to_owned(),
-        // cov:unreachable: `plist::Value` (plist 1.9.0) has exactly the nine variants
-        // matched above — Array, Dictionary, Boolean, Data, Date, Real, Integer,
-        // String, Uid. The enum is `#[non_exhaustive]`, so this arm exists only so a
+        // `plist::Value` (plist 1.9.0) has exactly the nine variants matched
+        // above — Array, Dictionary, Boolean, Data, Date, Real, Integer, String,
+        // Uid. The enum is `#[non_exhaustive]`, so this arm exists only so a
         // future plist release that adds a variant still compiles here.
-        _ => "value".to_owned(),
+        _ => "value".to_owned(), // cov:unreachable: plist 1.9.0 has only the nine variants above
     }
 }
 
