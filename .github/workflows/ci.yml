@@ -18,4 +18,16 @@ jobs:
   # and MSRV is read from rust-version. Anything that needed configuring would be
   # a behaviour change smuggled in by an adoption PR, so there is nothing here.
   ci:
-    uses: SecurityRonin/fleet-ci/.github/workflows/rust-ci.yml@a62ab10603151071744cec0b4e3638aa6406d4e4
+    uses: SecurityRonin/fleet-ci/.github/workflows/rust-ci.yml@e4bee453e6975d5c6ddf3d5120101364ebeaf7d6
+    with:
+      # CARRIED ACROSS. The replaced gate excluded main.rs explicitly — its own
+      # comment reads "main.rs (the Humble CLI shell) is excluded by the script".
+      # Adoption dropped that, so the strict gate began demanding 100% line
+      # coverage of a CLI shell this repo has never gated, and main went red on
+      # 10 lines that were never in scope.
+      #
+      # Also worth recording: the old gate enforced 100% LINE *and FUNCTION*
+      # coverage. The shared workflow has no function-coverage input, so that
+      # half is dropped. A real reduction, stated here rather than left to be
+      # found in a coverage report later.
+      coverage-ignore-regex: '(^|/)src/main\.rs'
