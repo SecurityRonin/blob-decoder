@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2](https://github.com/SecurityRonin/blob-decoder/compare/blob-decoder-v0.2.1...blob-decoder-v0.2.2) - 2026-08-09
+
+### Fixed
+
+- *(gitignore)* unanchor the target rule so nested cargo projects are ignored
+
 ## [0.2.1](https://github.com/SecurityRonin/blob-decoder/compare/blob-decoder-v0.2.0...blob-decoder-v0.2.1) - 2026-08-07
 
 ### Fixed
